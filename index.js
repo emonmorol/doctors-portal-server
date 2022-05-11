@@ -25,12 +25,21 @@ async function run() {
     const servicesCollection = client
       .db("doctors_portal")
       .collection("services");
+    const bookingsCollection = client
+      .db("doctors_portal")
+      .collection("bookings");
 
     app.get("/services", async (req, res) => {
       const query = {};
       const cursor = servicesCollection.find(query);
       const services = await cursor.toArray();
       res.send(services);
+    });
+
+    app.post("/bookings", async (req, res) => {
+      const booking = req.body;
+      const result = await bookingsCollection.insertOne(booking);
+      res.send(result);
     });
   } finally {
     // await client.close();
