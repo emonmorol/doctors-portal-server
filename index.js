@@ -78,6 +78,14 @@ async function run() {
       const result = await bookingsCollection.insertOne(booking);
       res.send({ success: true, result });
     });
+
+    app.get("/booking", async (req, res) => {
+      const patient = req.query.patient;
+      console.log(patient);
+      const query = { patientEmail: patient };
+      const bookings = await bookingsCollection.find(query).toArray();
+      res.send(bookings);
+    });
   } finally {
     // await client.close();
   }
