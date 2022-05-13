@@ -36,10 +36,47 @@ async function run() {
       res.send(services);
     });
 
+    app.get("/available", async (req, res) => {
+      const date = req.query.date || "May 14, 2022";
+
+      //step:1 get all services
+      const services = await servicesCollection.find({}).toArray();
+
+      //step2: get the booking of that day
+      const query = { date: date };
+      const bookings = await bookingsCollection.find(query).toArray();
+
+      // step3: for each service find bookings for that services
+
+      // this is not the proper way to query
+      // using mongoDB aggregation use the proper way
+
+      services.forEach((service) => {
+        const serviceBookings = bookings.filter(
+          (b) => b.treatmentName === service.name
+        );
+        const booked = serviceBookings.map((s) => s.slot);
+        service.slots = service.slots.filter((s) => !booked.includes(s));
+      });
+      res.send(services);
+    });
+
     app.post("/bookings", async (req, res) => {
       const booking = req.body;
+      const query = {
+        treatmentName: booking.treatmentName,
+        date: booking.date,
+        patientEmail: booking.patientEmail,
+      };
+      const exists = await bookingsCollection.findOne(query);
+      if (exists) {
+        return res.send({
+          success: false,
+          booking: "Booking Exists for today",
+        });
+      }
       const result = await bookingsCollection.insertOne(booking);
-      res.send(result);
+      res.send({ success: true, result });
     });
   } finally {
     // await client.close();
