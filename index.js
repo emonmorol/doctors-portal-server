@@ -80,9 +80,9 @@ async function run() {
     });
 
     app.get("/booking", async (req, res) => {
-      const patient = req.query.patient;
+      const { patient, date } = req.query;
       console.log(patient);
-      const query = { patientEmail: patient };
+      const query = { patientEmail: patient, date: date };
       const bookings = await bookingsCollection.find(query).toArray();
       res.send(bookings);
     });
